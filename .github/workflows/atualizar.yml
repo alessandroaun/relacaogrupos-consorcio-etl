@@ -1,0 +1,35 @@
+name: Atualizar dados do Power BI
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"  # a cada 6 horas
+  workflow_dispatch:
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependências
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
+
+      - name: Executar script
+        run: python main.py
+
+      - name: Commit do JSON atualizado
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add relacao_atualizada.json
+          git commit -m "Atualização automática do JSON" || echo "Sem alterações"
+          git push
